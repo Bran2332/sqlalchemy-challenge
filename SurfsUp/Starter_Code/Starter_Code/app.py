@@ -69,7 +69,7 @@ def stations():
     return jsonify(stations)
 
 @app.route("/api/v1.0/tobs")
-def monthly_temp():
+def tobs():
     query_date = dt.date(2017, 8, 23) - dt.timedelta(days=365)
     results = session.query(Measurement.tobs).\
     filter(Measurement.station == 'USC00519281').\
@@ -77,13 +77,19 @@ def monthly_temp():
     temps = list(np.ravel(results))
     return jsonify(temps)
 
+
 @app.route("/api/v1.0/temp/<start>")
 @app.route("/api/v1.0/temp/<end>")
 
-def start_to_end(start,end):
-    results = session.query(func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)).\
-        filter(Measurement.date >= start).filter(Measurement.date <= end).all()
-    return jsonify(results)
+def stats(start, end):
+        
+    sel = [func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]           
+
+    results = session.query(*sel).\
+    filter(Measurement.date >= start).\
+    filter(Measurement.date <= end).all()
+    temps = list(np.ravel(results))
+    return jsonify(temps)
 
 session.close()
 
